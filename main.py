@@ -22,6 +22,7 @@ def get_arguments():
     parser.add_argument("--run_random", help="Turn on to run random market of varying sizes", action="store_true")
     parser.add_argument("--run_varied", help="Turn on to run markets with varying pref. homogeniety", action="store_true")
     parser.add_argument("-l", "--log_results", help="Turn on to log experiment", action="store_true")
+    parser.add_argument("--==================", help="")
     args = parser.parse_args()
 
     return args
