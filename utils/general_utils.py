@@ -147,7 +147,7 @@ def print_stability_to_console(solver, t, stability):
         else:
             print("STABLE")
         print("The current Matchings are: ")
-        for p in solver.Mrkt.players:
+        for p in list(solver.Mrkt.players_dict.values()):
             if t not in p.successful_pulls.keys():
                 print(f"(p {p.index}, None)")
             else:
