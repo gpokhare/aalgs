@@ -1,4 +1,3 @@
-import config
 
 class Arm:
 
@@ -17,23 +16,9 @@ class Arm:
             for p in PlayerList:
                 self.players_list[p.index] = p
 
-        # THOMPSON ADDITION
-        # TODO: This goes in one of the children classes. Not Necessary here
-        if config.use_thompson:
-            # (rewards, pulls, meu, var)
-            self.p_deets = {}
-            for p in self.players_list.keys():
-                self.p_deets[p.index][p] = [0.0, 0.0, len(self.arms_list), len(self.arms_list)]
-        #####################################################################################################################
-
     def initialize_player_and_arms_list(self, PlayerList, ArmsList):
-        if ArmsList is not None:
-            for a in ArmsList:
-                self.arms_list[a.index] = a
-
-        if PlayerList is not None:
-            for p in PlayerList:
-                self.players_list[p.index] = p
+        self.players_list = PlayerList
+        self.arms_list = ArmsList
 
     def request_pull(self, player, time):
         if time not in self.pull_requests.keys():

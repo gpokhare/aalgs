@@ -15,9 +15,8 @@ Note: tracked_values dict is dependent on the type of reward structure the agent
     tracked_values[arm.index] = (total_reward, total_pulls, mean, variance)
 
 """
-from math import sqrt, log
 import numpy as np
-import config
+from structs import config
 
 class Player:
     def __init__(self, Index, ArmsList=None, PlayerList=None):
@@ -29,13 +28,8 @@ class Player:
         self.players_list = {}
 
     def initialize_player_and_arms_list(self, PlayerList, ArmsList):
-        if ArmsList is not None:
-            for a in ArmsList:
-                self.arms_list[a.index] = a
-
-        if PlayerList is not None:
-            for p in PlayerList:
-                self.players_list[p.index] = p
+        self.arms_list = ArmsList
+        self.players_list = PlayerList
 
     # Function to set Thompson Tracking of Rewards
     def set_thompson(self, arm, rewards, pulls, mean, variance):
@@ -49,7 +43,7 @@ class Player:
         variance = self.tracked_values[arm.index][3]
         reward = -99
         while reward < 0:
-            reward = np.random.normal(mean, sqrt(variance))
+            reward = np.random.normal(mean, np.sqrt(variance))
         return reward
 
     # Update Thompson Tracking of Preferences
@@ -82,7 +76,7 @@ class Player:
             return config.inf
         t_r = self.tracked_values[arm.index][0]
         t_p = self.tracked_values[arm.index][1]
-        return (t_r / t_p) + sqrt((3 * log(t)) / (2 * t_p))
+        return (t_r / t_p) + np.sqrt((3 * np.log(t)) / (2 * t_p))
 
     # Function that updates the ucb of the given arm.
     def update_ucb(self, arm, reward):
@@ -120,6 +114,21 @@ class Player:
         if config.use_thompson:
             return self.update_thompson(arm, reward)
 
+
+    # Function that initializes the belief tracking, either thompson or UCB
+    def initialize_belief_tracking(self, A, N):
+        if config.use_UCB:
+            return self.initialize_ucb()
+        if config.use_thompson:
+            return self.initialize_thompson()
+
+    def initialize_ucb(self):
+        for a in self.arms_list.keys():
+            self.set_ucb(self.arms_list[a], config.inf, 0.0)
+
+    def initialize_thompson(self):
+        for a in self.arms_list.keys():
+            self.set_thompson(self.arms_list[a], 0.0, 0.0, len(self.players_list), len(self.players_list))
 
     # Function that returns the best arm to pull at input time
     # TODO: Implemented in child class based on implementation

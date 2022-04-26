@@ -1,6 +1,16 @@
 import argparse
 from structs import config
 import sys
+import csv
+
+# Helper function that writes an array to file
+def write_to_file(filename, array):
+    file = open(filename, 'w', newline='')
+    writer = csv.writer(file)
+    for w in range(len(array)):
+        writer.writerow([array[w]])
+    file.close()
+
 # Function that gets arguments from the command line for running the experiments
 def get_arguments():
     parser = argparse.ArgumentParser()
@@ -24,7 +34,7 @@ def get_arguments():
     args = parser.parse_args()
 
     config.horizon = int(args.horizon)
-    config.running_on = int(args.running_on)
+
     config.number_of_runs = int(args.num_runs)
     config.experiment_type = int(args.experiment_type)
     config.player_preference_type = args.player_pref
@@ -55,7 +65,26 @@ def get_arguments():
         config.delete_temp_files = True
     else:
         config.delete_temp_files = False
-    return
+
+    config.running_on = args.running_on
+    # For Windows
+    if config.running_on == '0':
+        config.temploc = r'C:\Users\gabip\Desktop\logs\temp\\' # Folder location of where temporary files go
+        config.random_loc = r"C:\Users\gabip\Desktop\logs\Random\\" # Folder location of where Random Logs go
+        config.het_loc = r"C:\Users\gabip\Desktop\logs\Varied\\" # Folder location of where varied prefs go
+        config.anim = r"C:\Users\gabip\Desktop\logs\anim\\"
+        config.loc = r"C:\Users\gabip\Desktop\logs\\"
+    # For Mac and Linux
+    else:
+        if config.running_on == '1':
+            config.loc = r"/Users/gaurab/Documents/Git/logs/"
+        else:
+            config.loc = r"/scratch/gpokhare/logs/"
+        config.temploc = config.loc + "temp/"
+        config.random_loc = config.loc + "Random/"
+        config.het_loc = config.loc + "Varied/"
+        config.anim = config.loc + "anim/"
+
 
 
 def print_to_log(string):
@@ -66,3 +95,60 @@ def print_to_log(string):
         print(string)
     sys.stdout = org_stdout
 
+
+def print_true_state(solver):
+    org_stdout = sys.stdout
+    with open(config.loc + "run_" + str(config.run_number) + "_" + str(config.seed) + ".txt",
+              'a') as f:
+        sys.stdout = f
+        print("TRUE PREFERENCES OF THE MARKET")
+        print(solver.Mrkt)
+        sys.stdout = org_stdout
+    return
+
+def print_current_belief_state(solver, t, stability):
+    org_stdout = sys.stdout
+    with open(config.loc + "run_" + str(config.run_number) + "_" + str(config.seed) + ".txt", 'a') as f:
+        sys.stdout = f
+        if (t >= 2) and (t % config.debug_steps == 0):
+            print()
+            print("======================================================================")
+            print(f"TIME STEP: {t}")
+            print("--------------------------------------------------------------------")
+            print("Matching at current time step is ", end="")
+            if stability == 1:
+                print("STABLE")
+            else:
+                print(f"UNSTABLE. The blocking pair is : {solver.Mrkt.blocking_pair}")
+                print()
+                print("The current Matchings are: ")
+                for p in solver.Mrkt.players:
+                    if t not in p.successful_pulls.keys():
+                        print(f"(p {p.index}, None).", end="")
+                    else:
+                        print(f"(p {p.index}, a {p.successful_pulls[t]}).", end="")
+                    print("Player Belief : ", end=" >>>  ")
+                    p.print_player_state(t)
+                print("--------------------------------------------------------------------")
+                print("Current Arm Beliefs are: ")
+                for a in solver.Mrkt.arms:
+                    a.print_arm_state(t)
+            print("======================================================================")
+            print()
+        sys.stdout = org_stdout
+
+
+def print_stability_to_console(solver, t, stability):
+    if (t >= 2) and (t % 5000 == 0):
+        for _ in range(5):
+            print()
+        if stability == 0:
+            print("market unstable")
+        else:
+            print("STABLE")
+        print("The current Matchings are: ")
+        for p in solver.Mrkt.players:
+            if t not in p.successful_pulls.keys():
+                print(f"(p {p.index}, None)")
+            else:
+                print(f"(p {p.index}, a {p.successful_pulls[t]})")

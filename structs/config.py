@@ -26,25 +26,12 @@ debug = False
 debug_steps = 500 # Number of time steps in which to spit out world state
 delete_temp_files = False
 
-# For Windows
-if running_on == 0:
-    temploc = r'C:\Users\gabip\Desktop\logs\temp\\' # Folder location of where temporary files go
-    random_loc = r"C:\Users\gabip\Desktop\logs\Random\\" # Folder location of where Random Logs go
-    het_loc = r"C:\Users\gabip\Desktop\logs\Varied\\" # Folder location of where varied prefs go
-    anim = r"C:\Users\gabip\Desktop\logs\anim\\"
-    loc = r"C:\Users\gabip\Desktop\logs\\"
-# For Mac and Linux
-else:
-    if running_on == 1:
-        loc = r"/Users/gaurab/Documents/Git/logs/"
-    else:
-        loc = r"/scratch/gpokhare/logs/"
-    temploc = loc + "temp/"
-    random_loc = loc + "Random/"
-    het_loc = loc + "Varied/"
-    anim = loc + "anim/"
+temploc = None
+random_loc = None
+het_loc = None
+anim = None
+loc = None
 
-################################################################################################################
 
 
 
