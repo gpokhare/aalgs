@@ -74,9 +74,10 @@ player_preference_type = None
 arm_preference_type = None
 
 use_thompson = None
+use_UCB = None
 
 run_random = None # Run only random Preference
-run_varied_preference = None # Run only varied pref het
+run_varied = None # Run only varied pref het
 
 player_pessimal_regret = False # When false => Player optimal
 arm_pessimal_regret = True # When false => Arm Optimal

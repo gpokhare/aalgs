@@ -18,8 +18,7 @@ def get_arguments():
     # Non Boolean Vars
     parser.add_argument("--horizon", help="Number of time steps to run experiment for", metavar="t", required=True)
     parser.add_argument("--running_on", help="0 for windows, 1 for mac, 2 for linux", metavar="X", required=True)
-    parser.add_argument("--num_runs", help="Number of runs to execute", metavar="N")
-    parser.add_argument("--lambda", help="Value of Lambda for the experiment", metavar="L")
+    parser.add_argument("--num_runs", help="Number of runs to execute", metavar="N", required=True)
     parser.add_argument("--experiment_type", help="Experiment type to run, can be {0, 1, 2}", metavar="E", required=True)
     parser.add_argument("--player_pref", help="Can be Random/Varied", metavar="P", required=True)
     parser.add_argument("--arm_pref", help="Can be Random/Varied", metavar="A", required=True)
@@ -36,27 +35,42 @@ def get_arguments():
     args = parser.parse_args()
 
     config.horizon = int(args.horizon)
-    print(config.horizon)
+    config.running_on = int(args.running_on)
+    config.number_of_runs = int(args.num_runs)
+    config.experiment_type = int(args.experiment_type)
+    config.player_preference_type = args.player_pref
+    config.arm_preference_type = args.arm_pref
+    config.seed = int(args.seed)
 
-    return args
+    if args.use_thompson:
+        config.use_thompson = True
+        config.use_UCB = False
 
+    if args.use_UCB:
+        config.use_UCB = True
+        config.use_thompson = False
+
+    if args.run_random:
+        config.run_random = True
+    else:
+        config.run_random = False
+    if args.run_varied:
+        config.run_varied = True
+    else:
+        config.run_varied = False
+    if args.log_results:
+        config.debug = True
+    else:
+        config.debug = False
+    if args.delete_temp:
+        config.delete_temp_files = True
+    else:
+        config.delete_temp_files = False
+    return
 
 
 def main():
-    args = get_arguments()
-
-    if args.running_on == '0':
-        print("Windows")
-    elif args.running_on == '1':
-        print("Mac")
-    elif args.running_on == '2':
-        print("Linux")
-
-    if args.run_random:
-        print("running random")
-
-    if args.log_results:
-        print("Logging results")
+    get_arguments()
 
 if __name__ == "__main__":
     main()
