@@ -47,15 +47,8 @@ Experiment Type Options are:
 experiment_type = None
 
 
-if experiment_type == 0:
-    player_type = 'knowing'
-    arm_type = 'knowing'
-elif experiment_type == 1:
-    player_type = 'unknowing I'
-    arm_type = 'knowing'
-else:
-    player_type = 'unknowing II'
-    arm_type = 'unknowing'
+player_type = None
+arm_type = None
 
 player_preference_type = None
 arm_preference_type = None
@@ -76,6 +69,6 @@ horizon = None
 number_of_runs = 10
 Lambda = 0.9
 market_sizes = [5, 10, 15, 20]
-beta_vals = [0, 10, 100, 1000]
+beta_vals = [1000] #[0, 10, 100, 1000]
 
 ################################################################################################################

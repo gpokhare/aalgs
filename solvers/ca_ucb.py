@@ -28,7 +28,7 @@ class ca_ucb:
 
         for t in range(config.horizon):
 
-            if t == 2:
+            if t % config.debug_steps:
                 if config.debug:
                     org_stdout = sys.stdout
                     with open(config.loc + "thompson_log_run_" + str(config.run_number) + "_" + str(config.seed) + ".txt", 'a') as f:
@@ -100,7 +100,7 @@ class ca_ucb:
                     winning_player.update_belief(a, self.Mrkt.sample_reward_for_player(winning_player, a))
 
                     # Depending on algorithm type, arms also need to update UCB for player (Most of the stuff is handled in resolve pull request, this is here only because reward can be sampled from here)
-                    if config.player_type == 'unkowing II':
+                    if config.player_type == 'unknowing II':
                         reward = self.Mrkt.sample_reward_for_arm(a, winning_player)
                         a.update_belief(winning_player, reward)
 

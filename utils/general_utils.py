@@ -2,6 +2,8 @@ import argparse
 from structs import config
 import sys
 import csv
+import  numpy as np
+import random
 
 # Helper function that writes an array to file
 def write_to_file(filename, array):
@@ -21,7 +23,6 @@ def get_arguments():
     parser.add_argument("--experiment_type", help="Experiment type to run, can be {0, 1, 2}", metavar="E", required=True)
     parser.add_argument("--player_pref", help="Can be Random/Varied", metavar="P", required=True)
     parser.add_argument("--arm_pref", help="Can be Random/Varied", metavar="A", required=True)
-    parser.add_argument("--seed", help="Random Seed for this run", metavar="S", required=True)
 
     # Boolean Vars
     parser.add_argument("--use_thompson", help="Turn on to use Thompson Sampling for rewards ", action="store_true")
@@ -39,7 +40,7 @@ def get_arguments():
     config.experiment_type = int(args.experiment_type)
     config.player_preference_type = args.player_pref
     config.arm_preference_type = args.arm_pref
-    config.seed = int(args.seed)
+
 
     if args.use_thompson:
         config.use_thompson = True
@@ -85,7 +86,15 @@ def get_arguments():
         config.het_loc = config.loc + "Varied/"
         config.anim = config.loc + "anim/"
 
-
+    if config.experiment_type == 0:
+        config.player_type = 'knowing'
+        config.arm_type = 'knowing'
+    elif config.experiment_type == 1:
+        config.player_type = 'unknowing I'
+        config.arm_type = 'knowing'
+    else:
+        config.player_type = 'unknowing II'
+        config.arm_type = 'unknowing'
 
 def print_to_log(string):
     org_stdout = sys.stdout
@@ -104,7 +113,6 @@ def print_true_state(solver):
         print("TRUE PREFERENCES OF THE MARKET")
         print(solver.Mrkt)
         sys.stdout = org_stdout
-    return
 
 def print_current_belief_state(solver, t, stability):
     org_stdout = sys.stdout
@@ -140,8 +148,6 @@ def print_current_belief_state(solver, t, stability):
 
 def print_stability_to_console(solver, t, stability):
     if (t >= 2) and (t % 5000 == 0):
-        for _ in range(5):
-            print()
         if stability == 0:
             print("market unstable")
         else:

@@ -10,6 +10,9 @@ import os
 import glob
 from structs import config
 from solvers.ca_ucb import ca_ucb
+from utils.analysis import Analyse
+import numpy as np
+import random
 
 ##TODO
 # ""continue"" instead of resetting seed if you already find a run-data in location
@@ -20,7 +23,7 @@ from solvers.ca_ucb import ca_ucb
 def main():
     # First get the experiment settings
     general_utils.get_arguments()
-
+    arr = np.arange(0, 10000, 1)
 
     # Delete all existing temporary text log files from before
     prev_dir = os.getcwd()
@@ -39,7 +42,11 @@ def main():
             for N in config.market_sizes:
                 # config.newseed += 1
                 config.run_number = i
-                print(config.run_number)
+
+                seed = np.random.choice(arr, 1)[0]
+                np.random.seed(seed)
+                random.seed(seed)
+                config.seed = seed
 
                 # DEBUG
                 print()
@@ -47,16 +54,16 @@ def main():
                 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
                 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-                print(f"MARKET SIZE {N} RUN NUMBER {i}", end="")
+                print(f"MARKET SIZE {N} RUN NUMBER {i}")
                 # ========================================
 
-                regret_p_filename = config.temploc + 'regret_p_market_size_' + str(N) + '_run_' + str(i) + '.csv'
+                regret_p_filename = config.temploc +  'regret_p_market_size_' + str(N) + '_run_' + str(i) + '.csv'
                 regret_a_filename = config.temploc + 'regret_a_market_size_' + str(N) + '_run_' + str(i) + '.csv'
                 stability_filename = config.temploc + 'stability_market_size_' + str(N) + '_run_' + str(i) + '.csv'
 
 
-
                 if not os.path.exists(regret_p_filename):
+
 
                     instance = ca_ucb(number_of_agents=N, number_of_arms=N, beta=-1)
                     r_p_o, r_p_p, r_a_o, r_a_p, s = instance.run()
@@ -84,8 +91,14 @@ def main():
                 # config.newseed += 1
                 config.run_number = i
 
+                seed = np.random.choice(arr, 1)[0]
+                np.random.seed(seed)
+                random.seed(seed)
+                config.seed = seed
+
                 # DEBUG
-                print(f"BETA {b} RUN NUMBER {i}", end="")
+                print()
+                print(f"BETA {b} RUN NUMBER {i}")
                 # ========================================
                 # Write this instance to file for later analysis purpose
                 regret_p_filename = config.temploc + 'regret_p_beta_' + str(b) + '_run_' + str(i) + '.csv'
@@ -93,7 +106,6 @@ def main():
                 stability_filename = config.temploc + 'stability_beta_' + str(b) + '_run_' + str(i) + '.csv'
 
                 if not os.path.exists(regret_p_filename):
-
                     instance = ca_ucb(number_of_agents=N, number_of_arms=N, beta=b)
                     r_p_o, r_p_p, r_a_o, r_a_p, s = instance.run()
 
@@ -108,8 +120,8 @@ def main():
                     general_utils.write_to_file(stability_filename, s)
 
     #
-    # ana = Analyse(config.temploc)
-    # ana.analyse()
+    ana = Analyse(config.temploc)
+    ana.analyse()
 
 if __name__ == "__main__":
     main()

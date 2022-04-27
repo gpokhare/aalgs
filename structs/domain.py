@@ -22,7 +22,9 @@ class Market:
         self.beta = Beta
 
         # Make the arms and players
+        self.arms = list()
         self.arms_dict = {}
+        self.players = list()
         self.players_dict = {}
         self.player_preferences = {}
         self.arm_preferences = {}
@@ -89,12 +91,12 @@ class Market:
             # players know arm preferences, arms know their own preferences
             for index in range(self.N):
                 p = KnowingPlayer(Index=index)
-                # self.players.append(p)
+                self.players.append(p)
                 self.players_dict[index] = p
 
             for index in range(self.A):
                 a = KnowingArm(Index=index)
-                # self.arms.append(a)
+                self.arms.append(a)
                 self.arms_dict[index] = a
 
             self.player_preferences = self.initialize_players_preference(config.player_preference_type)
@@ -115,10 +117,12 @@ class Market:
             for index in range(self.N):
                 p = UnknowingPlayerI(Index=index)
                 self.players_dict[index] = p
+                self.players.append(p)
 
             for index in range(self.A):
                 a = KnowingArm(Index=index)
                 self.arms_dict[index] = a
+                self.arms.append(a)
 
             self.player_preferences = self.initialize_players_preference(config.player_preference_type)
             self.arm_preferences = self.initialize_arms_preference(config.arm_preference_type)
@@ -138,10 +142,12 @@ class Market:
             for index in range(self.N):
                 p = UnknowingPlayerII(Index=index)
                 self.players_dict[index] = p
+                self.players.append(p)
 
             for index in range(self.A):
                 a = UnknowingArm(Index=index)
                 self.arms_dict[index] = a
+                self.arms.append(a)
 
             self.player_preferences = self.initialize_players_preference(config.player_preference_type)
             self.arm_preferences = self.initialize_arms_preference(config.arm_preference_type)
@@ -162,35 +168,34 @@ class Market:
         p_pref = {}
         # If the player preferences are supposed to be random
         if preference_type == 'random':
-            for p in self.players_dict.values():
+            for p in self.players:
                 pref_order = []
-                random_order = np.arange(len(self.arms_dict.values()))
+                random_order = np.arange(len(self.arms))
                 np.random.shuffle(random_order)
-                arms_ = list(self.arms_dict.values())
-                for a in range(len(self.arms_dict.values())):
+                for a in range(len(self.arms)):
                     ii = random_order[a]
-                    pref_order.append(arms_[ii].index)
+                    pref_order.append(self.arms[ii].index)
                 p_pref[p.index] = pref_order
 
         # If player preferences aren't random, then they are varied according to Beta
         else:
             rewards = defaultdict(dict)
             # Caclulate the new rewards for the players
-            for i in self.arms_dict.keys():
+            for i in self.arms:
                 x_i = np.random.uniform(0, 1)
-                for k in self.players_dict.keys():
+                for k in self.players:
                     E_ik = np.random.logistic(0, 1)
                     U_ik = (self.beta * x_i) + E_ik
-                    rewards[i][k] = U_ik
+                    rewards[i.index][k.index] = U_ik
             # For each player
-            for p in self.players_dict.values():
+            for p in self.players:
                 # For each arm, calulate how many other arm's rewards as less than this arm's reward
                 # This arm's index in new preference order is that number
-                preference_order = [None] * (len(self.arms_dict.values()))
-                for current_arm in self.arms_dict.values():
+                preference_order = [None] * (len(self.arms))
+                for current_arm in self.arms:
                     current_reward = rewards[current_arm.index][p.index]
                     index = 0
-                    for a in self.arms_dict.values():
+                    for a in self.arms:
                         if a.index != current_arm.index:
                             rwrd = rewards[a.index][p.index]
                             if rwrd >= current_reward:
@@ -204,11 +209,11 @@ class Market:
         a_pref = {}
         # If the player preferences are supposed to be random
         if preference_type == 'random':
-            for a in self.arms_dict.values():
+            for a in self.arms:
                 pref_order = []
                 random_order = np.arange(self.N)
                 np.random.shuffle(random_order)
-                players = list(self.players_dict.values())
+                players = self.players
                 for p in range(self.N):
                     pref_order.append(players[random_order[p]].index)
                 a_pref[a.index] = pref_order
@@ -216,18 +221,18 @@ class Market:
         # If player preferences aren't random, then they are varied according to Beta
         else:
             rewards = defaultdict(dict)
-            for i in self.players_dict.keys():
+            for i in self.players():
                 x_i = np.random.uniform(0, 1)
-                for k in self.arms_dict.keys():
+                for k in self.arms():
                     E_ik = np.random.logistic(0, 1)
                     U_ik = (self.beta * x_i) + E_ik
-                    rewards[i][k] = U_ik
-            for a in self.arms_dict.values():
-                preference_order = [None] * (len(self.players_dict.values()))
-                for current_player in self.players_dict.values():
+                    rewards[i.index][k.index] = U_ik
+            for a in self.arms:
+                preference_order = [None] * (len(self.players))
+                for current_player in self.players:
                     current_reward = rewards[current_player.index][a.index]
                     index = 0
-                    for p in self.players_dict.values():
+                    for p in self.players:
                         if p.index != current_player.index:
                             rwrd = rewards[p.index][a.index]
                             if rwrd >= current_reward:
@@ -294,7 +299,7 @@ class Market:
         for p in self.players_dict.values():
             # Create a dict of mean reward of arms
             reward_dict = {}
-            max_reward = self.A
+            max_reward = self.A + 5
             # Loop over all arms in preference order
             for a in self.player_preferences[p.index]:
                 reward_dict[a] = max_reward
@@ -305,7 +310,7 @@ class Market:
         for a in self.arms_dict.values():
             # Create a dict of mean rewards of players
             reward_dict = {}
-            max_reward = self.N
+            max_reward = self.N + 5
             # Loop over all players in preference order
             for p in self.arm_preferences[a.index]:
                 reward_dict[p] = max_reward

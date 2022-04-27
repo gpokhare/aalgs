@@ -41,33 +41,33 @@ class UnknowingArm(Arm):
     # Function that sets the ucb of the given player
     def set_ucb(self, player, value, number_of_pulls):
         self.tracked_values[player.index] = [value, number_of_pulls]
-        return
+
 
     # Function that sets the thompson tracking for a given player
     def set_thompson(self, player, reward, pulls, mean, variance):
         self.tracked_values[player.index] = [reward, pulls, mean, variance]
-        return
+
 
     # Function that initializes the UCB tracking of the players
     def initialize_ucb(self):
         for player_index in self.players_list.keys():
             plyr = self.players_list[player_index]
             self.set_ucb(plyr, config.inf, 0)
-        return
+
 
     # Function that initializes the thompson tracking of the players
     def initialize_thompson(self):
         for player_index in self.players_list.keys():
             plyr = self.players_list[player_index]
             self.set_thompson(plyr, 0.0, 0.0, len(self.players_list.keys()), len(self.players_list.keys()))
-        return
+
 
     # Function that initializes the belief tracking, either thompson or UCB
     def initialize_belief_tracking(self):
         if config.use_UCB:
-            return self.initialize_ucb()
+            self.initialize_ucb()
         if config.use_thompson:
-            return self.initialize_thompson()
+            self.initialize_thompson()
 
     # Function that gets the ucb of the given player at current time
     def get_ucb(self, player, t):
@@ -84,7 +84,7 @@ class UnknowingArm(Arm):
         else:
             self.tracked_values[player.index][0] += reward
         self.tracked_values[player.index][1] += 1
-        return
+
 
     # Get the thompson sample of the given player at current time
     def get_thompson(self, player):
@@ -99,30 +99,30 @@ class UnknowingArm(Arm):
 
     # Update the thompson belief for the player at current time
     def update_thompson(self, player, reward):
-        self.tracked_values[player.index][0] += reward
-        self.tracked_values[player.index][1] += 1
+
+        new_reward = self.tracked_values[player.index][0] + reward
+        new_pulls = self.tracked_values[player.index][1] + 1
         old_mean = self.tracked_values[player.index][2]
         old_variance = self.tracked_values[player.index][3]
 
-        total_reward = self.tracked_values[player.index][0]
-        n = self.tracked_values[player.index][1]
+        total_reward = new_reward
+        n = new_pulls
 
         new_mean = (1 / ((1 / old_variance) + (n / old_variance))) * (
                     (old_mean / old_variance) + (total_reward / old_variance))
         new_variance = ((1 / old_variance) + (n / old_variance)) ** (-1)
-        self.tracked_values[player.index][2] = new_mean
+
         if new_variance <= 0.000001:
-            self.tracked_values[player.index][3] = 0.000001
-        else:
-            self.tracked_values[player.index][3] = new_variance
-        return
+            new_variance = 0.000001
+        self.set_thompson(player, new_reward, new_pulls, new_mean, new_variance)
+
 
     # Function that updates the belief, either UCB or Thompson for a given arm at time t
     def update_belief(self, player, reward):
         if config.use_UCB:
-            return self.update_ucb(player, reward)
+            self.update_ucb(player, reward)
         if config.use_thompson:
-            return self.update_thompson(player, reward)
+            self.update_thompson(player, reward)
 
 
     # Function that returns either the UCB value of the arm, or the thompson sample of the arm
@@ -150,7 +150,8 @@ class UnknowingArm(Arm):
                 best_val = curr_val
             elif curr_val == best_val:
                 best_list.append(curr_player)
-        best_player = self.players_list[best_list[random.randint(0, len(best_list) - 1)]]
+        best_player_index = np.random.choice(best_list, 1)[0]
+        best_player = self.players_list[best_player_index]
         return best_player
 
     def check_better_player(self, p1_idnex, p2_index, time):
@@ -179,7 +180,7 @@ class UnknowingArm(Arm):
             self.pulls[time] = best_player_index
             best_player.pull_arm(self, time)
 
-            if not config.player_type == 'unkowing II':
+            if not config.player_type == 'unknowing II':
                 general_utils.print_to_log("ERROR: Player/ARM type mismatch.")
             else:
                 pull_requests = self.pull_requests[time].copy()

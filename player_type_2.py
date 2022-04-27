@@ -20,46 +20,65 @@ class UnknowingPlayerII(Player):
         self.win_counts = {}
         self.lose_counts = {}
 
+        #========================
+        self.last_ucb = None
+        self.last_probab = None
+        self.last_value = None
+        # ========================
 
     def print_player_state(self, time):
         print(f"Player {self.index} ::: ", end="")
 
-        player_list = self.get_matched_players(time)
-        # Calculate first vector
-        ucb_vector = np.ones(len(self.arms_list.keys()), int)
-        for arm_index in self.arms_list.keys():
-            val = self.get_ucb(self.arms_list[arm_index], time)
-            ucb_vector[arm_index] = val
-
-        # Calculate second vector
-        probability_vector = np.zeros(len(self.arms_list.keys()))
-        arm_index = 0
-        for player_index in player_list:
-            if player_index == -99:
-                probability_vector[arm_index] = 1.0
-            else:
-                probability_vector[arm_index] = self.get_probability_of_winning(self.players_list[player_index],
-                                                                                self.arms_list[arm_index], time)
-            arm_index += 1
-
-        values = ucb_vector * probability_vector
-
-        # for arm_index in self.arms_list.keys():
-        #     print(f"({arm_index}, UCB: {ucb_vector[arm_index]:.2f}, P: {probability_vector[arm_index]:.2f}, V: {values[arm_index]:.2f}) ", end="")
-        # print("")
-        # ADDITION
+        #===============================================================================================================
         arr = np.zeros((len(self.arms_list.keys()), 2))
         for arm_index in self.arms_list.keys():
             arr[arm_index][0] = arm_index
-            arr[arm_index][1] = values[arm_index]
+            arr[arm_index][1] = self.last_value[arm_index]
         arr = arr[arr[:, 1].argsort()]
         for row in range(arr.shape[0] - 1, -1, -1):
             arm_index = int(arr[row][0])
             print(
-                f"(A{arm_index}, pulls : {self.tracked_values[arm_index][1]:.2f} , Mean: {self.tracked_values[arm_index][2]:.2f}, Prob: {probability_vector[arm_index]:.2f}, V: {values[arm_index]:.2f})  ||",
+                f"(A{arm_index}, Mean: {self.last_ucb[arm_index]:.2f}, Prob: {self.last_probab[arm_index]:.2f}, V: {self.last_value[arm_index]:.2f})  ||",
                 end="")
         print("")
-        ###################################################################################################################
+        #===============================================================================================================
+
+        # player_list = self.get_matched_players(time)
+        # # Calculate first vector
+        # ucb_vector = np.ones(len(self.arms_list.keys()), int)
+        # for arm_index in self.arms_list.keys():
+        #     val = self.get_ucb(self.arms_list[arm_index], time)
+        #     ucb_vector[arm_index] = val
+        #
+        # # Calculate second vector
+        # probability_vector = np.zeros(len(self.arms_list.keys()))
+        # arm_index = 0
+        # for player_index in player_list:
+        #     if player_index == -99:
+        #         probability_vector[arm_index] = 1.0
+        #     else:
+        #         probability_vector[arm_index] = self.get_probability_of_winning(self.players_list[player_index],
+        #                                                                         self.arms_list[arm_index], time)
+        #     arm_index += 1
+        #
+        # values = np.multiply(ucb_vector, probability_vector)
+        #
+        # # for arm_index in self.arms_list.keys():
+        # #     print(f"({arm_index}, UCB: {ucb_vector[arm_index]:.2f}, P: {probability_vector[arm_index]:.2f}, V: {values[arm_index]:.2f}) ", end="")
+        # # print("")
+        # # ADDITION
+        # arr = np.zeros((len(self.arms_list.keys()), 2))
+        # for arm_index in self.arms_list.keys():
+        #     arr[arm_index][0] = arm_index
+        #     arr[arm_index][1] = values[arm_index]
+        # arr = arr[arr[:, 1].argsort()]
+        # for row in range(arr.shape[0] - 1, -1, -1):
+        #     arm_index = int(arr[row][0])
+        #     print(
+        #         f"(A{arm_index}, pulls : {self.tracked_values[arm_index][1]:.2f} , Mean: {self.tracked_values[arm_index][2]:.2f}, Prob: {probability_vector[arm_index]:.2f}, V: {values[arm_index]:.2f})  ||",
+        #         end="")
+        # print("")
+        # ###################################################################################################################
 
     def make_graph_thompson(self, time, AX, colors):
         AXX = gridspec.GridSpec(5, 2)
@@ -117,6 +136,7 @@ class UnknowingPlayerII(Player):
         win_counts = self.win_counts[player.index][arm.index]
         lose_counts = self.lose_counts[player.index][arm.index]
         total = win_counts + lose_counts
+        #print(win_counts, lose_counts)
         if total == 0:
             return 1
         if config.use_thompson:
@@ -149,19 +169,28 @@ class UnknowingPlayerII(Player):
         # Calculate second vector
         probability_vector = np.zeros(len(self.arms_list.keys()))
         arm_index = 0
-        for player_index in player_list:
-            if player_index == -99:
+        for arm_index in range(len(player_list)):
+            if player_list[arm_index] == -99:
                 probability_vector[arm_index] = 1.0
             else:
+                player_index = player_list[arm_index]
                 probability_vector[arm_index] = self.get_probability_of_winning(self.players_list[player_index],
                                                                                 self.arms_list[arm_index], time)
-            arm_index += 1
 
         # Find Max and return
         values = np.multiply(ucb_vector, probability_vector)
-        index = np.argmax(values)
+        max_val = np.amax(values)
+        indices = np.where(values == max_val)[0]
+        return_val = np.random.choice(indices, 1)[0] # Randomly break ties
         self.dump_anim_files(values, probability_vector)
-        return self.arms_list[index]
+
+        #--------------------------------------
+        self.last_probab = probability_vector
+        self.last_value = values
+        self.last_ucb = ucb_vector
+        #--------------------------------------
+
+        return self.arms_list[return_val]
 
     def get_matched_players(self, time):
         players = np.zeros(len(self.arms_list.keys()), int)

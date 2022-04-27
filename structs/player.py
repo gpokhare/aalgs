@@ -49,22 +49,19 @@ class Player:
     # Update Thompson Tracking of Preferences
     def update_thompson(self, arm, reward):
         # UPDATE POSTERIOR MEAN AND PRECISION FOR ARM
-        self.tracked_values[arm.index][0] += reward # Update total reward
-        self.tracked_values[arm.index][1] += 1 # Update total pulls
+        new_reward = self.tracked_values[arm.index][0] + reward # Update total reward
+        new_pulls = self.tracked_values[arm.index][1] + 1 # Update total pulls
         old_mean = self.tracked_values[arm.index][2] # Keep a copy of old mean
         old_variance = self.tracked_values[arm.index][3] # Keep a copy of old variance
-        total_reward = self.tracked_values[arm.index][0]
-        n = self.tracked_values[arm.index][1]
+        total_reward = new_reward
+        n = new_pulls
         new_mean = (1 / ((1 / old_variance) + (n / old_variance))) * (
                     (old_mean / old_variance) + (total_reward / old_variance)) # Calculate new mean
         new_variance = ((1 / old_variance) + (n / old_variance)) ** (-1) # Calculate new variance
-        self.tracked_values[arm.index][2] = new_mean
-
         # This is here to prevent NaN errors, variance 0 leads to issues. Keeping a very small number instead
         if new_variance <= 0.000001:
-            self.tracked_values[arm.index][3] = 0.000001
-        else:
-            self.tracked_values[arm.index][3] = new_variance
+            new_variance = 0.000001
+        self.set_thompson(arm, new_reward, new_pulls, new_mean, new_variance)
 
     # Function that sets the ucb of the given arm for the player to input value
     def set_ucb(self, arm, value, number_of_pulls):
@@ -85,19 +82,16 @@ class Player:
         else:
             self.tracked_values[arm.index][0] += reward
         self.tracked_values[arm.index][1] += 1
-        return
 
     # Function that attemps an arm
     def attempt_arm(self, arm, time):
         self.attempted_pulls[time] = arm.index
         # Request to be pulled by arm
         arm.request_pull(self, time)
-        return
 
     # Function that pulls as arm
     def pull_arm(self, arm, time):
         self.successful_pulls[time] = arm.index
-        return
 
     # Function that returns either the UCB value of the arm, or the thompson sample of the arm
     # based on current belief
@@ -110,17 +104,17 @@ class Player:
     # Function that updates the belief, either UCB or Thompson for a given arm at time t
     def update_belief(self, arm, reward):
         if config.use_UCB:
-            return self.update_ucb(arm, reward)
+            self.update_ucb(arm, reward)
         if config.use_thompson:
-            return self.update_thompson(arm, reward)
+            self.update_thompson(arm, reward)
 
 
     # Function that initializes the belief tracking, either thompson or UCB
     def initialize_belief_tracking(self, A, N):
         if config.use_UCB:
-            return self.initialize_ucb()
+            self.initialize_ucb()
         if config.use_thompson:
-            return self.initialize_thompson()
+            self.initialize_thompson()
 
     def initialize_ucb(self):
         for a in self.arms_list.keys():
