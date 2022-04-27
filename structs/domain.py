@@ -221,9 +221,9 @@ class Market:
         # If player preferences aren't random, then they are varied according to Beta
         else:
             rewards = defaultdict(dict)
-            for i in self.players():
+            for i in self.players:
                 x_i = np.random.uniform(0, 1)
-                for k in self.arms():
+                for k in self.arms:
                     E_ik = np.random.logistic(0, 1)
                     U_ik = (self.beta * x_i) + E_ik
                     rewards[i.index][k.index] = U_ik
@@ -296,7 +296,7 @@ class Market:
         mean_rewards_arm = {}
 
         # For all players
-        for p in self.players_dict.values():
+        for p in self.players:
             # Create a dict of mean reward of arms
             reward_dict = {}
             max_reward = self.A + 5
@@ -307,7 +307,7 @@ class Market:
             mean_rewards_player[p.index] = reward_dict
 
         # For all arms
-        for a in self.arms_dict.values():
+        for a in self.arms:
             # Create a dict of mean rewards of players
             reward_dict = {}
             max_reward = self.N + 5
