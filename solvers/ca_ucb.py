@@ -58,7 +58,7 @@ class ca_ucb:
 
 
             if t % 5000 == 0:
-                print(f"Time Step: {t}")
+                print(f"Time Step: {t}", end=" ")
 
 
             for i in range(self.N):

@@ -80,7 +80,7 @@ def get_arguments():
         if config.running_on == '1':
             config.loc = r"/Users/gaurab/Documents/Git/logs/"
         else:
-            config.loc = r"/scratch/gpokhare/logs/"
+            config.loc = r"/scratch/gpokhare/temp/logs/"
         config.temploc = config.loc + "temp/"
         config.random_loc = config.loc + "Random/"
         config.het_loc = config.loc + "Varied/"
@@ -152,9 +152,9 @@ def print_stability_to_console(solver, t, stability):
             print("market unstable")
         else:
             print("STABLE")
-        print("The current Matchings are: ")
-        for p in list(solver.Mrkt.players_dict.values()):
-            if t not in p.successful_pulls.keys():
-                print(f"(p {p.index}, None)")
-            else:
-                print(f"(p {p.index}, a {p.successful_pulls[t]})")
+        # print("The current Matchings are: ")
+        # for p in list(solver.Mrkt.players_dict.values()):
+        #     if t not in p.successful_pulls.keys():
+        #         print(f"(p {p.index}, None)")
+        #     else:
+        #         print(f"(p {p.index}, a {p.successful_pulls[t]})")

@@ -18,8 +18,6 @@ import random
 # ""continue"" instead of resetting seed if you already find a run-data in location
 
 
-
-
 def main():
     # First get the experiment settings
     general_utils.get_arguments()
