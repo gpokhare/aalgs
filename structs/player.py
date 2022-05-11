@@ -55,9 +55,14 @@ class Player:
         old_variance = self.tracked_values[arm.index][3] # Keep a copy of old variance
         total_reward = new_reward
         n = new_pulls
-        new_mean = (1 / ((1 / old_variance) + (n / old_variance))) * (
-                    (old_mean / old_variance) + (total_reward / old_variance)) # Calculate new mean
-        new_variance = ((1 / old_variance) + (n / old_variance)) ** (-1) # Calculate new variance
+        # new_mean = (1 / ((1 / old_variance) + (n / old_variance))) * (
+        #             (old_mean / old_variance) + (total_reward / old_variance)) # Calculate new mean
+        # new_variance = ((1 / old_variance) + (n / old_variance)) ** (-1) # Calculate new variance
+
+        new_mean = (1 / ((1 / old_variance) + (n / 1))) * (
+                (old_mean / old_variance) + (total_reward / 1))  # Calculate new mean
+        new_variance = ((1 / old_variance) + (n / 1)) ** (-1)  # Calculate new variance
+
         # This is here to prevent NaN errors, variance 0 leads to issues. Keeping a very small number instead
         if new_variance <= 0.000001:
             new_variance = 0.000001
