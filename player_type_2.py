@@ -100,29 +100,30 @@ class UnknowingPlayerII(Player):
 
     # TODO: Write this
     def dump_anim_files(self, values, probability):
-        means = np.zeros(len(self.arms_list))
-        variances = np.zeros(len(self.arms_list))
-        for arm_index in range(len(self.arms_list)):
-            means[arm_index] = self.tracked_values[arm_index][2]
-            variances[arm_index] = self.tracked_values[arm_index][3]
-
-        mean_name = config.anim + f"thomp_valsm_{self.index}.csv"
-        var_name = config.anim + f"thomp_valsv_{self.index}.csv"
-        prob_name = config.anim + f"prob_vals_{self.index}.csv"
-        val_name = config.anim + f"vals_{self.index}.csv"
-
-        with open(mean_name, 'a') as f:
-            writer = csv.writer(f)
-            writer.writerow(means)
-        with open(var_name, 'a') as f:
-            writer = csv.writer(f)
-            writer.writerow(variances)
-        with open(prob_name, 'a') as f:
-            writer = csv.writer(f)
-            writer.writerow(probability)
-        with open(val_name, 'a') as f:
-            writer = csv.writer(f)
-            writer.writerow(values)
+        pass
+        # means = np.zeros(len(self.arms_list))
+        # variances = np.zeros(len(self.arms_list))
+        # for arm_index in range(len(self.arms_list)):
+        #     means[arm_index] = self.tracked_values[arm_index][2]
+        #     variances[arm_index] = self.tracked_values[arm_index][3]
+        #
+        # mean_name = config.anim + f"thomp_valsm_{self.index}.csv"
+        # var_name = config.anim + f"thomp_valsv_{self.index}.csv"
+        # prob_name = config.anim + f"prob_vals_{self.index}.csv"
+        # val_name = config.anim + f"vals_{self.index}.csv"
+        #
+        # with open(mean_name, 'a') as f:
+        #     writer = csv.writer(f)
+        #     writer.writerow(means)
+        # with open(var_name, 'a') as f:
+        #     writer = csv.writer(f)
+        #     writer.writerow(variances)
+        # with open(prob_name, 'a') as f:
+        #     writer = csv.writer(f)
+        #     writer.writerow(probability)
+        # with open(val_name, 'a') as f:
+        #     writer = csv.writer(f)
+        #     writer.writerow(values)
 
 
     def initialize_probabilities_matrix(self):
